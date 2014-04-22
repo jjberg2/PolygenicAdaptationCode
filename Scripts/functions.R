@@ -88,7 +88,7 @@ PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.
 					individual.off.center.cov.mats = individual.off.center.cov.mats , 
 					individual.off.center.T.mats = individual.off.center.T.mats
 				)
-	recover()
+	#recover()
 	p.vals <- list ()
 	p.vals$Qx <- sum ( the.stats$Qx < null.stats$Qx ) / length ( null.stats$Qx )
 	p.vals$Fst.comp <- sum ( the.stats$Fst.comp < null.stats$Fst.comp ) / length ( null.stats$Fst.comp )
@@ -201,7 +201,7 @@ NullStats <- function ( gwas.data , match.pop , env.var.data , pop.names , uncen
 	betas <- do.call ( cbind , lapply ( null.stats , function ( y ) do.call ( cbind , lapply ( y , function ( x ) unlist ( x [[ 4 ]] ) ) ) ) )
 	pearson.rs <- do.call ( cbind , lapply ( null.stats , function ( y ) do.call ( cbind , lapply ( y , function ( x ) unlist ( x [[ 5 ]] ) ) ) ) )
 	spearman.rhos <- do.call ( cbind , lapply ( null.stats , function ( y ) do.call ( cbind , lapply ( y , function ( x ) unlist ( x [[ 6 ]] ) ) ) ) )
-	reg.Zs <- lapply ( null.stats , function ( z ) do.call ( cbind , lapply ( 1 : length ( env.var.data ) , function ( y ) do.call ( cbind , lapply ( z , function ( x ) x [[ 7 ]] [ , y ] ) ) ) ) )
+	reg.Zs <- lapply (  1 : length ( env.var.data ) , function ( u ) do.call ( cbind , lapply ( lapply ( null.stats , function ( w ) lapply ( lapply ( 1 : length ( env.var.data ) , function ( y ) lapply ( w , function ( x ) x [[ 7 ]] [ , y ] ) ) , function ( z ) as.matrix ( do.call ( cbind , z  ) ) ) ) , function ( v ) v [[ u ]] ) ) )
 	ind.Zs <- do.call ( cbind , lapply ( null.stats , function ( y ) do.call ( cbind , lapply ( y , function ( x ) x [[ 8 ]] ) ) ) )
 	return ( list ( Qx = Qx , Fst.component = Fst.component , LD.component = LD.component , betas = betas , pearson.rs = pearson.rs , spearman.rhos = spearman.rhos , reg.Zs = reg.Zs , ind.Zs = ind.Zs ) )
 
@@ -406,6 +406,6 @@ PolygenicAdaptationFunction (
 									cov.SNPs.per.cycle = 5000 , 
 									cov.cycles = 2 , 
 									null.phenos.per.cycle = 1000 , 
-									null.cycles = 2 
+									null.cycles = 10 
 									 )	
 }
