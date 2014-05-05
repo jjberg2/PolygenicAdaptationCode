@@ -33,7 +33,7 @@ while(<>)
     # rs0123   USA  A   C   1
     my @split_line = split(/\s+/, $line);
     # array = ["rs0123", "USA", "A", "C", "1"]
-    if (defined($snps{$split_line[0]}))
+    if (defined($snps{$split_line[0]}) || ($split_line[0]=~/[SNP]/))
     {
         print "$line\n";
     }
