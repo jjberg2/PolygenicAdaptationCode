@@ -1,7 +1,7 @@
 source ( "CodeForRelease/Scripts/CreateTraitFile.R")								
 source ( "CodeForRelease/Scripts/functions.R")	 
-CreateTraitFile ( "Trait_Data/FilesForPaper/T2D.txt" , "Genome_Data/HapMapInHGDP_PositionsAndBValues")
-RemoveSNPs ( "Trait_Data/FilesForPaper/T2D.txt" , "Trait_Data/FilesForPaper/T2D.HapMapInHGDP_PositionsAndBValues.freqs" , "Trait_Data/FilesForPaper/newT2D.txt" )	
+#CreateTraitFile ( "Trait_Data/FilesForPaper/T2D.txt" , "Genome_Data/HapMapInHGDP_PositionsAndBValues")
+#RemoveSNPs ( "Trait_Data/FilesForPaper/T2D.txt" , "Trait_Data/FilesForPaper/T2D.HapMapInHGDP_PositionsAndBValues.freqs" , "Trait_Data/FilesForPaper/newT2D.txt" )	
 options ( error = function () {pushover("Error");recover()})
 PolygenicAdaptationFunction ( 
 									gwas.data.file = "Trait_Data/FilesForPaper/newT2D.txt" , 

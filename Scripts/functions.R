@@ -1,15 +1,16 @@
 #setwd("/Users/JeremyBerg/Documents/Academics/CoopLab/Projects/EnvironmentalCorrelations")
 setwd("/Users/JeremyBerg/Documents/Academics/PolygenSel")
-PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.data.files , match.pop.file , full.dataset.file , path , match.categories , match.bins  , cov.SNPs.per.cycle = 5000 , cov.cycles = 4 , null.phenos.per.cycle = 1000 , null.cycles = 2 ) {
+PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.data.files , match.pop.file , full.dataset.file , path , match.categories , match.bins  , cov.SNPs.per.cycle = 5000 , cov.cycles = 4 , null.phenos.per.cycle = 1000 , null.cycles = 2 , load.cov.mat = F ) {
 	library ( plyr )
-	#recover()
-	##### Read in GWAS file, frequencies file, match pop file, and environmental variables files; also sort environmental variable files alphanumerically
+	recover()
+	##### Read in GWAS file, frequencies file, match pop file, and environmental variables files; also sort environmental variable files alphanumerically, create output directory
 	dir.create ( path )
 	gwas.data <- read.table ( gwas.data.file , header = T , stringsAsFactors = F )
 	freqs <- read.table ( freqs.file , header = T , stringsAsFactors = F )
 	env.var.data <- lapply ( env.var.data.files , read.table , header = T , stringsAsFactors = F )
 	env.var.data <- lapply ( env.var.data , function ( ENV.VAR ) ENV.VAR [ order ( ENV.VAR$CLST ) , ] )
 	match.pop <- read.table ( match.pop.file , header = T )
+	dir.create ( paste ( path , "/Output" , sep = "" ) )
 	
 	# sanity checks
 	if ( any ( unlist ( lapply ( env.var.data , function ( y ) lapply ( env.var.data , function ( x ) !x$CLST %in% y$CLST ) ) ) ) ) stop ( "Environmental variable datasets differ in the number of populations." )
@@ -60,10 +61,10 @@ PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.
 	
 	freqs <- freqs [ with ( freqs , order ( SNP , CLST ) ) , ] 
 	#recover()
-	if ( file.exists ( paste ( path , "/uncenteredcovmat.Rdata" , sep = "" ) ) ) {
+	if ( file.exists ( paste ( path , "/uncenteredcovmat.Rdata" , sep = "" ) ) & load.cov.mat == T ) {
 		load ( paste ( path , "/uncenteredcovmat.Rdata" , sep = "" ) )
 	} else {
-		uncentered.cov.mat <- SampleCovSNPs ( gwas.data , match.pop , pop.names , bin.names , SNPs.per.cycle = cov.SNPs.per.cycle , cycles = cov.cycles , path = path , full.dataset.file = full.dataset.file )
+		uncentered.cov.mat <- SampleCovSNPs ( gwas.data , match.pop , pop.names , bin.names , SNPs.per.cycle = cov.SNPs.per.cycle , cycles = cov.cycles , path = path , full.dataset.file = full.dataset.file , env.var.data = env.var.data )
 	}
 	T.mat <- matrix ( rep ( c ( ( num.pops - 1 ) / num.pops , rep ( - 1 / ( num.pops ) , times = num.pops - 1 ) ) , times = num.pops - 1 ) , ncol = num.pops , nrow = num.pops - 1 )
 	tmp1 <- lapply ( env.var.data , function ( x ) GetOffCovMats ( x , uncentered.cov.mat , gwas.data$EFF , freqs ) )
@@ -79,9 +80,6 @@ PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.
 	epsilon.freqs <- tapply ( freqs$FRQ , freqs$SNP , mean )
 	add.gen.var <- sum ( gwas.data$EFF [ order ( gwas.data$SNP ) ]^2  * epsilon.freqs * ( 1 - epsilon.freqs ) )
 	
-	null.stats <- NullStats ( gwas.data , match.pop , env.var.data , pop.names , uncentered.cov.mat , F.inv , C.inv , T.mat , regional.off.center.cov.mats , regional.off.center.T.mats , individual.off.center.cov.mats , individual.off.center.T.mats , bin.names , null.phenos.per.cycle , null.cycles , path , full.dataset.file )
-	
-	
 	the.stats <- CalcStats ( 
 					freqs = matrix ( freqs$FRQ , nrow = num.pops ) ,
 					effects = gwas.data$EFF ,
@@ -92,8 +90,12 @@ PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.
 					regional.off.center.cov.mats = regional.off.center.cov.mats , 
 					regional.off.center.T.mats = regional.off.center.T.mats , 
 					individual.off.center.cov.mats = individual.off.center.cov.mats , 
-					individual.off.center.T.mats = individual.off.center.T.mats
+					individual.off.center.T.mats = individual.off.center.T.mats , 
+					path = path , 
+					null = F
 				)
+	recover()
+	null.stats <- NullStats ( gwas.data , match.pop , env.var.data , pop.names , uncentered.cov.mat , F.inv , C.inv , T.mat , regional.off.center.cov.mats , regional.off.center.T.mats , individual.off.center.cov.mats , individual.off.center.T.mats , bin.names , null.phenos.per.cycle , null.cycles , path , full.dataset.file )
 	#recover()
 	p.vals <- list ()
 	p.vals$Qx <- sum ( the.stats$Qx < null.stats$Qx ) / length ( null.stats$Qx )
@@ -104,12 +106,11 @@ PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.
 	p.vals$pearson.rs <- rowSums ( null.stats$pearson.rs^2 > unlist ( the.stats$pearson.rs )^2 ) / ncol ( null.stats$betas )
 	tmp.upper.tail <- rowSums ( null.stats$spearman.rhos < unlist ( the.stats$spearman.rhos ) ) / ncol ( null.stats$spearman.rhos )
 	p.vals$spearman.rhos <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
-	tmp.upper.tail <- mapply ( function ( x , y ) rowSums ( x > y ) / ncol ( x ) , x = null.stats$reg.Z , y = split ( t ( the.stats[[7]] ) , 1:5 ) )
+	tmp.upper.tail <- mapply ( function ( x , y ) rowSums ( x > y ) / ncol ( x ) , x = null.stats$reg.Z , y = split ( t ( the.stats[[7]] ) , 1:nrow ( the.stats [[ 7 ]]) ) )
 	p.vals$reg.Z <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
 	tmp.upper.tail <- rowSums ( null.stats$ind.Z > the.stats$ind.Z ) / ncol ( null.stats$ind.Z )
 	p.vals$ind.Z <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
 	
-	dir.create ( paste ( path , "/Output" , sep = "" ) )
 	save ( p.vals , file = paste ( path , "/Output/pVals.Robj" , sep = "" ) )
 	save ( the.stats , file = paste ( path , "/Output/theStats.Robj" , sep = "" ) )
 	save ( null.stats , file = paste ( path , "/Output/nullStats.Robj" , sep = "" ) )
@@ -118,7 +119,7 @@ PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.
 }
 
 GetOffCovMats <- function ( env.var.data , uncentered.cov.mat , effects , freqs ) {
-	#recover()
+	recover()
 	mat.cols <- list ()
 	add.vars.regional <- list ()
 	add.vars.individual <- list ()
@@ -146,7 +147,7 @@ GetOffCovMats <- function ( env.var.data , uncentered.cov.mat , effects , freqs 
 	k <- k + 1
 	}
 	T.mats <- lapply ( mat.cols , function ( x ) do.call ( cbind , x ) )
-	T.mats <- lapply ( T.mats , function ( x ) x [  - sample ( which ( x[1,] != 1 & x[1,] != 0 ) , 1 ) , ] )
+	T.mats <- lapply ( T.mats , function ( x ) x [ - sample ( which ( x[1,] != 1 & x[1,] != 0 ) , 1 ) , ] )
 	off.center.cov.mats <- lapply ( T.mats , function ( x ) x %*% uncentered.cov.mat %*% t ( x ) )
 	return ( list ( off.center.cov.mats , T.mats ) )
 }
@@ -186,6 +187,7 @@ NullStats <- function ( gwas.data , match.pop , env.var.data , pop.names , uncen
 		sampled.null.data <- read.table ( paste ( path , "/null.samples" , j , sep = "" ) , stringsAsFactors = F , h = T  )
 		sampled.null.data <- sampled.null.data [ , 1 : 5 ]
 		colnames ( sampled.null.data ) <- c ( "SNP" , "CLST" , "A1" , "A2" , "FRQ" )
+		sampled.null.data <- sampled.null.data [ sampled.null.data$CLST %in% env.var.data[[1]]$CLST , ]
 		sampled.null.data <- sampled.null.data [ with ( sampled.null.data  , order ( SNP , CLST ) ) , ]
 		SNP.table <- lapply ( sampled.SNPs , function ( x ) table ( x ) )
 		split.sampled.null.data <- split ( sampled.null.data , sampled.null.data$CLST )
@@ -213,10 +215,24 @@ NullStats <- function ( gwas.data , match.pop , env.var.data , pop.names , uncen
 	return ( list ( Qx = Qx , Fst.component = Fst.component , LD.component = LD.component , betas = betas , pearson.rs = pearson.rs , spearman.rhos = spearman.rhos , reg.Zs = reg.Zs , ind.Zs = ind.Zs ) )
 
 }
-CalcStats <- function ( freqs , effects , env.var.data , var , uncentered.cov.mat , T.mat , regional.off.center.cov.mats , regional.off.center.T.mats , individual.off.center.cov.mats , individual.off.center.T.mats ) {
+PCAProjections <- function ( F.mat , cent.gvs , var , path) {
+	recover()
+	my.eig <- eigen ( F.mat * var )
+	var.proj <- numeric ( length ( my.eig$values ) )
+	for ( i in 1 : length ( my.eig$values ) ) {
+		var.proj [ i ] <- ( ( my.eig$vectors [ , i ] %*% cent.gvs ) / sqrt ( my.eig$values [ i ] ) )^2
+	}
+	dir.create ( paste ( path , "/figs" , sep = "" ) )
+	pdf ( paste ( path , "/figs/PCAQx.pdf" , sep = "" ) )
+	plot ( var.proj , pch = 20 , xlab = "Principal Component" , ylab = expression ( paste ( "PCA " , Q[X] , sep = "" ) ) )
+	dev.off()
+	save ( var.proj , file = paste ( path , "/Output/PCVarProj.Rdata" , sep = "" ) )
+	save ( my.eig , file = paste ( path , "/Output/PCs.Rdata" , sep = "" ) )
+}
+CalcStats <- function ( freqs , effects , env.var.data , var , uncentered.cov.mat , T.mat , regional.off.center.cov.mats , regional.off.center.T.mats , individual.off.center.cov.mats , individual.off.center.T.mats , path , null = T ) {
 	#recover()
 	
-	# old way mean center and drop a pop
+	# mean center and drop a pop
 	F.mat <- T.mat %*% ( uncentered.cov.mat ) %*% t ( T.mat )
 	F.inv <- solve ( F.mat )
 	C.inv <- solve ( t ( chol ( F.mat ) ) )
@@ -238,9 +254,10 @@ CalcStats <- function ( freqs , effects , env.var.data , var , uncentered.cov.ma
 	betas <- lapply ( std.env , function ( x ) sum ( std.gvs * x ) / sum ( x^2 ) )
 	pearson.rs <- lapply ( std.env , function ( x ) sum ( std.gvs * x ) / sqrt ( sum ( x^2 )*sum ( std.gvs^2 ) ) )
 	spearman.rhos <- lapply ( std.env , function ( x ) cor ( std.gvs , x , method = "spearman" ) )
-	
-	
-	
+	save ( gvs , file = paste ( path , "/Output/genetic.values.Robj" , sep = "" ) )
+	if ( null == F ) {
+		PCAProjections ( F.mat , cent.gvs , var , path )
+	}
 	# regional Z scores
 	reg.Z.scores <- mapply ( function ( COV , TMAT ) 
 		mapply ( function ( THIS.COV , THIS.TMAT ) 
@@ -282,7 +299,7 @@ condNormal <- function(x.given, mu, sigma, given.ind, req.ind){
 	cVar <- B - CDinv %*% t(C)
 	return ( list(condMean=cMu, condVar=cVar) )
 }
-SampleCovSNPs <- function ( gwas.data , match.pop , pop.names , bin.names , SNPs.per.cycle , cycles , path , full.dataset.file ) {
+SampleCovSNPs <- function ( gwas.data , match.pop , pop.names , bin.names , SNPs.per.cycle , cycles , path , full.dataset.file , env.var.data ) {
 	
 	#recover()
 	num.pops <- length ( pop.names )
@@ -322,6 +339,7 @@ SampleCovSNPs <- function ( gwas.data , match.pop , pop.names , bin.names , SNPs
 		sampled.cov.data <- read.table ( paste ( path , "/cov.samples" , k , sep = "" ) , stringsAsFactors = F , h = T )
 		sampled.cov.data <- sampled.cov.data [ , 1 : 5 ]
 		colnames ( sampled.cov.data ) <- c ( "SNP" , "CLST" , "A1" , "A2" , "FRQ" )
+		sampled.cov.data <- sampled.cov.data [ sampled.cov.data$CLST %in% env.var.data[[1]]$CLST , ]
 		sampled.cov.data$FRQ <- as.numeric ( sampled.cov.data$FRQ )
 		#sampled.SNPs <- read.table ( paste ( path , "/cov.SNPs" , k , sep = "" ) , stringsAsFactors = F ) 
 		sampled.cov.data <- sampled.cov.data [ with ( sampled.cov.data , order ( SNP , CLST ) ) , ]
@@ -338,7 +356,7 @@ SampleCovSNPs <- function ( gwas.data , match.pop , pop.names , bin.names , SNPs
 	
 	#recover()
 	uncentered.cov.mat <- Reduce ( "+" , uncentered.cov.mat)/cycles
-	save ( uncentered.cov.mat , file = paste ( path , "/uncenteredcovmat.Robj" , sep = "" ) )
+	save ( uncentered.cov.mat , file = paste ( path , "/uncenteredcovmat.Rdata" , sep = "" ) )
 	return ( uncentered.cov.mat )
 }
 

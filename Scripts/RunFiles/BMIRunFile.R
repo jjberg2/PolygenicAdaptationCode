@@ -1,7 +1,7 @@
 source ( "CodeForRelease/Scripts/CreateTraitFile.R")								
 source ( "CodeForRelease/Scripts/functions.R")	 
-CreateTraitFile ( "Trait_Data/FilesForPaper/BMI.txt" , "Genome_Data/HapMapInHGDP_PositionsAndBValues")
-RemoveSNPs ( "Trait_Data/FilesForPaper/BMI.txt" , "Trait_Data/FilesForPaper/BMI.HapMapInHGDP_PositionsAndBValues.freqs" , "Trait_Data/FilesForPaper/newBMI.txt" )	
+#CreateTraitFile ( "Trait_Data/FilesForPaper/BMI.txt" , "Genome_Data/HapMapInHGDP_PositionsAndBValues")
+#RemoveSNPs ( "Trait_Data/FilesForPaper/BMI.txt" , "Trait_Data/FilesForPaper/BMI.HapMapInHGDP_PositionsAndBValues.freqs" , "Trait_Data/FilesForPaper/newBMI.txt" )	
 options ( error = function () {pushover("Error");recover()})
 PolygenicAdaptationFunction ( 
 									gwas.data.file = "Trait_Data/FilesForPaper/newBMI.txt" , 

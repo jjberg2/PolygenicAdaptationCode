@@ -35,3 +35,14 @@ RemoveSNPs <- function ( gwas.data.filename , freq.data.filename , output.file )
 	
 	
 }
+
+RemovePops <- function ( freq.data.filename , env.var.data.filename ) {
+	
+	#recover()
+	env.var.data <- read.table ( env.var.data.filename , h = T )
+	freq.data <- read.table ( freq.data.filename , h = T )
+	new.freq.data <- freq.data [ freq.data$CLST %in% env.var.data$CLST , ] 
+	write.table ( new.freq.data , file = paste ( freq.data.filename , "." , strsplit ( env.var.data.filename , "/" )[[1]][2] , sep = "" ) , quote = F , row.names = F , col.names = T )
+	
+	
+}
