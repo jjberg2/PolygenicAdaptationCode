@@ -32,3 +32,13 @@
 *.tdo
 HeightTest*
 *(Autosaved)*
+*cov.samples*
+*cov.SNPs*
+*null.samples*
+*null.SNPs*
+*BMI*
+*T2D*
+*CD*
+*UC*
+*SkinPigment*
+*height*
