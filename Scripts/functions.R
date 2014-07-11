@@ -119,7 +119,7 @@ PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.
 }
 
 GetOffCovMats <- function ( env.var.data , uncentered.cov.mat , effects , freqs ) {
-	recover()
+	#recover()
 	mat.cols <- list ()
 	add.vars.regional <- list ()
 	add.vars.individual <- list ()
