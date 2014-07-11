@@ -39,9 +39,9 @@ HeightTest*
 *cov.SNPs*
 *null.samples*
 *null.SNPs*
-*BMI*
-*T2D*
-*CD*
-*UC*
-*SkinPigment*
+*BMI/*
+*T2D/*
+*CD/*
+*UC/*
+*SkinPigment/*
 Scripts/RunFiles*
