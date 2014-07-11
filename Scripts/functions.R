@@ -1,8 +1,8 @@
 #setwd("/Users/JeremyBerg/Documents/Academics/CoopLab/Projects/EnvironmentalCorrelations")
-setwd("/Users/JeremyBerg/Documents/Academics/PolygenSel")
-PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.data.files , match.pop.file , full.dataset.file , path , match.categories , match.bins  , cov.SNPs.per.cycle = 5000 , cov.cycles = 4 , null.phenos.per.cycle = 1000 , null.cycles = 2 , load.cov.mat = F ) {
+#setwd("/Users/JeremyBerg/Documents/Academics/PolygenSel")
+PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.data.files , match.pop.file , full.dataset.file , path , match.categories , match.bins  , cov.SNPs.per.cycle = 5000 , cov.cycles = 4 , null.phenos.per.cycle = 1000 , null.cycles = 2 , load.cov.mat = F , PCProj = F , sim.null = T , check.allele.orientation = F ) {
 	library ( plyr )
-	recover()
+	#recover()
 	##### Read in GWAS file, frequencies file, match pop file, and environmental variables files; also sort environmental variable files alphanumerically, create output directory
 	dir.create ( path )
 	gwas.data <- read.table ( gwas.data.file , header = T , stringsAsFactors = F )
@@ -19,15 +19,10 @@ PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.
 	if ( any ( !gwas.data$SNP %in% freqs$SNP ) ) stop ( "GWAS dataset contains SNPs that are not in the frequency dataset.")
 	if ( any ( !freqs$SNP %in% gwas.data$SNP ) ) stop ( "GWAS dataset contains SNPs that are not in the frequency dataset.")
 	
-	# bit to deal with monomorphic SNPs here, although probably that's a preprocessing step
-	
-	
-	# bit to deal with linked SNPs, although probably also preprocessing
-	
 	
 	# bit to flip alleles so they are the same way round in both the GWAS dataset and freqs dataset	
 	# TODO: check on MatchAlleles function and see if it needs to be cleaned up
-	gwas.data <- MatchAlleles ( gwas.data , freqs  )
+	if ( check.allele.orientation == T ) gwas.data <- MatchAlleles ( gwas.data , freqs  )
 	save ( gwas.data , file = paste ( path , "/GWAS.file.RData" , sep = "" ) )
 	
 	
@@ -92,34 +87,39 @@ PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.
 					individual.off.center.cov.mats = individual.off.center.cov.mats , 
 					individual.off.center.T.mats = individual.off.center.T.mats , 
 					path = path , 
+					PCProj = PCProj ,
 					null = F
 				)
-	recover()
-	null.stats <- NullStats ( gwas.data , match.pop , env.var.data , pop.names , uncentered.cov.mat , F.inv , C.inv , T.mat , regional.off.center.cov.mats , regional.off.center.T.mats , individual.off.center.cov.mats , individual.off.center.T.mats , bin.names , null.phenos.per.cycle , null.cycles , path , full.dataset.file )
 	#recover()
 	p.vals <- list ()
-	p.vals$Qx <- sum ( the.stats$Qx < null.stats$Qx ) / length ( null.stats$Qx )
-	p.vals$Fst.comp <- sum ( the.stats$Fst.comp < null.stats$Fst.comp ) / length ( null.stats$Fst.comp )
-	p.vals$LD.comp <- sum ( the.stats$LD.comp < null.stats$LD.comp ) / length ( null.stats$LD.comp )
-	tmp.upper.tail <- rowSums ( null.stats$betas < unlist ( the.stats$betas ) ) / ncol ( null.stats$betas )
-	p.vals$betas <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
-	p.vals$pearson.rs <- rowSums ( null.stats$pearson.rs^2 > unlist ( the.stats$pearson.rs )^2 ) / ncol ( null.stats$betas )
-	tmp.upper.tail <- rowSums ( null.stats$spearman.rhos < unlist ( the.stats$spearman.rhos ) ) / ncol ( null.stats$spearman.rhos )
-	p.vals$spearman.rhos <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
-	tmp.upper.tail <- mapply ( function ( x , y ) rowSums ( x > y ) / ncol ( x ) , x = null.stats$reg.Z , y = split ( t ( the.stats[[7]] ) , 1:nrow ( the.stats [[ 7 ]]) ) )
-	p.vals$reg.Z <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
-	tmp.upper.tail <- rowSums ( null.stats$ind.Z > the.stats$ind.Z ) / ncol ( null.stats$ind.Z )
-	p.vals$ind.Z <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
-	
-	save ( p.vals , file = paste ( path , "/Output/pVals.Robj" , sep = "" ) )
-	save ( the.stats , file = paste ( path , "/Output/theStats.Robj" , sep = "" ) )
-	save ( null.stats , file = paste ( path , "/Output/nullStats.Robj" , sep = "" ) )
-	return ( list ( the.stats , p.vals ) )
-	
+	if ( sim.null == T ) {
+		null.stats <- NullStats ( gwas.data , match.pop , env.var.data , pop.names , uncentered.cov.mat , F.inv , C.inv , T.mat , regional.off.center.cov.mats , regional.off.center.T.mats , individual.off.center.cov.mats , individual.off.center.T.mats , bin.names , null.phenos.per.cycle , null.cycles , path , full.dataset.file )
+		#recover()
+		p.vals$Qx <- sum ( the.stats$Qx < null.stats$Qx ) / length ( null.stats$Qx )
+		p.vals$Fst.comp <- sum ( the.stats$Fst.comp < null.stats$Fst.comp ) / length ( null.stats$Fst.comp )
+		p.vals$LD.comp <- sum ( the.stats$LD.comp < null.stats$LD.comp ) / length ( null.stats$LD.comp )
+		tmp.upper.tail <- rowSums ( null.stats$betas < unlist ( the.stats$betas ) ) / ncol ( null.stats$betas )
+		p.vals$betas <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
+		p.vals$pearson.rs <- rowSums ( null.stats$pearson.rs^2 > unlist ( the.stats$pearson.rs )^2 ) / ncol ( null.stats$betas )
+		tmp.upper.tail <- rowSums ( null.stats$spearman.rhos < unlist ( the.stats$spearman.rhos ) ) / ncol ( null.stats$spearman.rhos )
+		p.vals$spearman.rhos <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
+		tmp.upper.tail <- mapply ( function ( x , y ) rowSums ( x > y ) / ncol ( x ) , x = null.stats$reg.Z , y = split ( t ( the.stats[[7]] ) , 1:nrow ( the.stats [[ 7 ]]) ) )
+		p.vals$reg.Z <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
+		tmp.upper.tail <- rowSums ( null.stats$ind.Z > the.stats$ind.Z ) / ncol ( null.stats$ind.Z )
+		p.vals$ind.Z <- ifelse ( tmp.upper.tail > 0.5 , 2 * ( 1 - tmp.upper.tail ) , 2 * tmp.upper.tail )
+		
+		save ( p.vals , file = paste ( path , "/Output/pVals.Robj" , sep = "" ) )
+		save ( the.stats , file = paste ( path , "/Output/theStats.Robj" , sep = "" ) )
+		save ( null.stats , file = paste ( path , "/Output/nullStats.Robj" , sep = "" ) )
+		return ( list ( the.stats , p.vals ) )
+	} else {
+		p.vals$Qx <- 1 - pchisq ( the.stats$Qx , nrow ( T.mat ) )
+		#return ( list ( the.stats , p.vals ) )
+	}	
 }
 
 GetOffCovMats <- function ( env.var.data , uncentered.cov.mat , effects , freqs ) {
-	recover()
+	#recover()
 	mat.cols <- list ()
 	add.vars.regional <- list ()
 	add.vars.individual <- list ()
@@ -183,7 +183,7 @@ NullStats <- function ( gwas.data , match.pop , env.var.data , pop.names , uncen
 		}
 		all.sampled.SNPs <- unique ( unlist ( sampled.SNPs ) )
 		write ( all.sampled.SNPs , file = paste ( path , "/null.SNPs" , j , sep = "" ) , ncolumns = 1 )
-		system ( paste ( "CodeForRelease/Scripts/sampleSNPs.pl " , path , "/null.SNPs" , j , " " , full.dataset.file , " > " , path , "/null.samples" , j , sep = "" ) )
+		system ( paste ( "Scripts/sampleSNPs.pl " , path , "/null.SNPs" , j , " " , full.dataset.file , " > " , path , "/null.samples" , j , sep = "" ) )
 		sampled.null.data <- read.table ( paste ( path , "/null.samples" , j , sep = "" ) , stringsAsFactors = F , h = T  )
 		sampled.null.data <- sampled.null.data [ , 1 : 5 ]
 		colnames ( sampled.null.data ) <- c ( "SNP" , "CLST" , "A1" , "A2" , "FRQ" )
@@ -216,7 +216,7 @@ NullStats <- function ( gwas.data , match.pop , env.var.data , pop.names , uncen
 
 }
 PCAProjections <- function ( F.mat , cent.gvs , var , path) {
-	recover()
+	#recover()
 	my.eig <- eigen ( F.mat * var )
 	var.proj <- numeric ( length ( my.eig$values ) )
 	for ( i in 1 : length ( my.eig$values ) ) {
@@ -229,7 +229,7 @@ PCAProjections <- function ( F.mat , cent.gvs , var , path) {
 	save ( var.proj , file = paste ( path , "/Output/PCVarProj.Rdata" , sep = "" ) )
 	save ( my.eig , file = paste ( path , "/Output/PCs.Rdata" , sep = "" ) )
 }
-CalcStats <- function ( freqs , effects , env.var.data , var , uncentered.cov.mat , T.mat , regional.off.center.cov.mats , regional.off.center.T.mats , individual.off.center.cov.mats , individual.off.center.T.mats , path , null = T ) {
+CalcStats <- function ( freqs , effects , env.var.data , var , uncentered.cov.mat , T.mat , regional.off.center.cov.mats , regional.off.center.T.mats , individual.off.center.cov.mats , individual.off.center.T.mats , path , PCProj = F , null = T ) {
 	#recover()
 	
 	# mean center and drop a pop
@@ -254,8 +254,8 @@ CalcStats <- function ( freqs , effects , env.var.data , var , uncentered.cov.ma
 	betas <- lapply ( std.env , function ( x ) sum ( std.gvs * x ) / sum ( x^2 ) )
 	pearson.rs <- lapply ( std.env , function ( x ) sum ( std.gvs * x ) / sqrt ( sum ( x^2 )*sum ( std.gvs^2 ) ) )
 	spearman.rhos <- lapply ( std.env , function ( x ) cor ( std.gvs , x , method = "spearman" ) )
-	save ( gvs , file = paste ( path , "/Output/genetic.values.Robj" , sep = "" ) )
-	if ( null == F ) {
+	if ( null == F ) save ( gvs , file = paste ( path , "/Output/genetic.values.Robj" , sep = "" ) )
+	if ( PCProj == T ) {
 		PCAProjections ( F.mat , cent.gvs , var , path )
 	}
 	# regional Z scores
@@ -335,7 +335,7 @@ SampleCovSNPs <- function ( gwas.data , match.pop , pop.names , bin.names , SNPs
 		sampled.SNPs.count <- table ( unlist ( sampled.SNPs ) )
 		sampled.SNPs <- unlist ( sampled.SNPs )
 		write ( unlist ( sampled.SNPs ) , file = paste ( path , "/cov.SNPs" , k , sep = "" ) , ncolumns = 1 )
-		system ( paste ( "CodeForRelease/Scripts/sampleSNPs.pl " , path , "/cov.SNPs" , k , " " , full.dataset.file , " > " , path , "/cov.samples" , k , sep = "" ) )
+		system ( paste ( "Scripts/sampleSNPs.pl " , path , "/cov.SNPs" , k , " " , full.dataset.file , " > " , path , "/cov.samples" , k , sep = "" ) )
 		sampled.cov.data <- read.table ( paste ( path , "/cov.samples" , k , sep = "" ) , stringsAsFactors = F , h = T )
 		sampled.cov.data <- sampled.cov.data [ , 1 : 5 ]
 		colnames ( sampled.cov.data ) <- c ( "SNP" , "CLST" , "A1" , "A2" , "FRQ" )
@@ -356,7 +356,7 @@ SampleCovSNPs <- function ( gwas.data , match.pop , pop.names , bin.names , SNPs
 	
 	#recover()
 	uncentered.cov.mat <- Reduce ( "+" , uncentered.cov.mat)/cycles
-	save ( uncentered.cov.mat , file = paste ( path , "/uncenteredcovmat.Rdata" , sep = "" ) )
+	save ( uncentered.cov.mat , file = paste ( path , "/Output/uncenteredcovmat.Rdata" , sep = "" ) )
 	return ( uncentered.cov.mat )
 }
 
@@ -392,125 +392,3 @@ MatchAlleles <- function ( gwas.data , assoc.loci.freqs ) {
 	# }
 	return ( gwas.data )
 }
-if ( FALSE ) {
-source ( "CodeForRelease/Scripts/CreateTraitFile.R")
-male.rec <- read.table ( "Trait_Data/MaleRecDecodeSingle" , h=T , stringsAsFactors=F)
-male.rec <- cbind ( male.rec [ , c(1:3,5) ] , "FRQ" = male.rec [ , 4 ] / 100 )
-write.table ( male.rec , file = "Trait_Data/MaleRecDecodeSingle" , row.names = F , quote = F )
-CreateTraitFile ( "Trait_Data/MaleRecDecodeSingle" , "Genome_Data/HapMapInHGDP_PositionsAndBValues")
-
-
-PolygenicAdaptationFunction ( 
-									gwas.data.file = "Trait_Data/MaleRecDecodeSingle.4" , 
-									freqs.file = "Trait_Data/MaleRecDecodeSingle.HapMapInHGDP_PositionsAndBValues.freqs" , 
-									env.var.data.files = list ( "EnvVar/LATS/HGDP_LATS_GLOBAL" , "EnvVar/LATS/HGDP_LATS_GLOBAL" ) , 
-									match.pop.file = "Genome_Data/French_GLOBAL" , 
-									full.dataset.file = "Genome_Data/HapMapInHGDP_PositionsAndBValues" , 
-									path = "Analyses/MaleRecSingle" , 
-									match.categories = c ( "MAF" , "BVAL" ) ,
-									match.bins = list ( seq ( 0 , 0.5 , 0.02 ), seq ( 0 , 1000 , 100 ) ) , 
-									cov.SNPs.per.cycle = 5000 , 
-									cov.cycles = 1 , 
-									null.phenos.per.cycle = 1000 , 
-									null.cycles = 1 
-									 )	
-
-
-
-### Height
-PolygenicAdaptationFunction ( 
-									gwas.data.file = "Trait_Data/europe.height.168" , 
-									freqs.file = "Trait_Data/europe.height.HapMapInHGDP_PositionsAndBValues.freqs" , 
-									env.var.data.files = list ( "EnvVar/LATS/HGDP_LATS_GLOBAL" ,
-																"EnvVar/SUMMERPCS/HGDP_SUMPC1_GLOBAL" ,
-																"EnvVar/SUMMERPCS/HGDP_SUMPC2_GLOBAL" ,
-																"EnvVar/WINTERPCS/HGDP_WINPC1_GLOBAL" , 
-																"EnvVar/WINTERPCS/HGDP_WINPC2_GLOBAL" 
-																) , 
-									match.pop.file = "Genome_Data/French_GLOBAL" , 
-									full.dataset.file = "Genome_Data/HapMapInHGDP_PositionsAndBValues" , 
-									path = "CodeForRelease/HeightTest" , 
-									match.categories = c ( "MAF" , "IMP" ) ,
-									match.bins = list ( seq ( 0 , 0.5 , 0.02 ), c ( 2 ) ) , 
-									cov.SNPs.per.cycle = 5000 , 
-									cov.cycles = 4 , 
-									null.phenos.per.cycle = 1000 , 
-									null.cycles = 10 
-									 )	
-
-
-
-### Skin Pigmentation	
-source ( "CodeForRelease/Scripts/CreateTraitFile.R")
-CreateTraitFile ( "Trait_Data/FilesForPaper/skin.pigment.txt" , "Genome_Data/HapMapInHGDP_PositionsAndBValues")
-PolygenicAdaptationFunction ( 
-									gwas.data.file = "Trait_Data/FilesForPaper/skin.pigment.txt" , 
-									freqs.file = "Trait_Data/FilesForPaper/skin.pigment.HapMapInHGDP_PositionsAndBValues.freqs" , 
-									env.var.data.files = list ( "EnvVar/LATS/HGDP_LATS_GLOBAL" ,
-																"EnvVar/SUMMERPCS/HGDP_SUMPC1_GLOBAL" ,
-																"EnvVar/SUMMERPCS/HGDP_SUMPC2_GLOBAL" ,
-																"EnvVar/WINTERPCS/HGDP_WINPC1_GLOBAL" , 
-																"EnvVar/WINTERPCS/HGDP_WINPC2_GLOBAL" 
-																) , 
-									match.pop.file = "Genome_Data/CapeVerde" , 
-									full.dataset.file = "Genome_Data/HapMapInHGDP_PositionsAndBValues" , 
-									path = "CodeForRelease/SkinPigment" , 
-									match.categories = c ( "MAF" , "IMP" , "BVAL" ) ,
-									match.bins = list ( seq ( 0 , 0.5 , 0.02 ), c ( 2 ) , seq ( 0 , 1000 , 100 ) ) , 
-									cov.SNPs.per.cycle = 5000 , 
-									cov.cycles = 4 , 
-									null.phenos.per.cycle = 10000 , 
-									null.cycles = 1 
-									 )	
-
-# BMI
-CreateTraitFile ( "Trait_Data/FilesForPaper/BMI.txt" , "Genome_Data/HapMapInHGDP_PositionsAndBValues")
-source ( "CodeForRelease/Scripts/functions.R")									 
-source ( "CodeForRelease/Scripts/CreateTraitFile.R")									 
-PolygenicAdaptationFunction ( 
-									gwas.data.file = "Trait_Data/FilesForPaper/newBMI.txt" , 
-									freqs.file = "Trait_Data/FilesForPaper/BMI.HapMapInHGDP_PositionsAndBValues.freqs" , 
-									env.var.data.files = list ( "EnvVar/LATS/HGDP_LATS_GLOBAL" ,
-																"EnvVar/SUMMERPCS/HGDP_SUMPC1_GLOBAL" ,
-																"EnvVar/SUMMERPCS/HGDP_SUMPC2_GLOBAL" ,
-																"EnvVar/WINTERPCS/HGDP_WINPC1_GLOBAL" , 
-																"EnvVar/WINTERPCS/HGDP_WINPC2_GLOBAL" 
-																) , 
-									match.pop.file = "Genome_Data/French_GLOBAL" , 
-									full.dataset.file = "Genome_Data/HapMapInHGDP_PositionsAndBValues" , 
-									path = "CodeForRelease/BMI" , 
-									match.categories = c ( "MAF" , "IMP" , "BVAL" ) ,
-									match.bins = list ( seq ( 0 , 0.5 , 0.02 ), c ( 2 ) , seq ( 0 , 1000 , 100 ) ) , 
-									cov.SNPs.per.cycle = 5000 , 
-									cov.cycles = 4 , 
-									null.phenos.per.cycle = 5000 , 
-									null.cycles = 2 
-									)	
-pushover ( "Done with BMI run." )
-									 
-									 
-source ( "CodeForRelease/Scripts/CreateTraitFile.R")								
-source ( "CodeForRelease/Scripts/functions.R")	 
-CreateTraitFile ( "Trait_Data/FilesForPaper/T2D.txt" , "Genome_Data/HapMapInHGDP_PositionsAndBValues")
-RemoveSNPs ( "Trait_Data/FilesForPaper/T2D.txt" , "Trait_Data/FilesForPaper/T2D.HapMapInHGDP_PositionsAndBValues.freqs" , "Trait_Data/FilesForPaper/newT2D.txt" )	
-PolygenicAdaptationFunction ( 
-									gwas.data.file = "Trait_Data/FilesForPaper/newT2D.txt" , 
-									freqs.file = "Trait_Data/FilesForPaper/T2D.HapMapInHGDP_PositionsAndBValues.freqs" , 
-									env.var.data.files = list ( "EnvVar/LATS/HGDP_LATS_GLOBAL" ,
-																"EnvVar/SUMMERPCS/HGDP_SUMPC1_GLOBAL" ,
-																"EnvVar/SUMMERPCS/HGDP_SUMPC2_GLOBAL" ,
-																"EnvVar/WINTERPCS/HGDP_WINPC1_GLOBAL" , 
-																"EnvVar/WINTERPCS/HGDP_WINPC2_GLOBAL" 
-																) , 
-									match.pop.file = "Genome_Data/French_GLOBAL" , 
-									full.dataset.file = "Genome_Data/HapMapInHGDP_PositionsAndBValues" , 
-									path = "CodeForRelease/T2D" , 
-									match.categories = c ( "MAF" , "IMP" , "BVAL" ) ,
-									match.bins = list ( seq ( 0 , 0.5 , 0.02 ), c ( 2 ) , seq ( 0 , 1000 , 100 ) ) , 
-									cov.SNPs.per.cycle = 5000 , 
-									cov.cycles = 4 , 
-									null.phenos.per.cycle = 2500 , 
-									null.cycles = 4 
-									 )	; pushover ( "Done with T2D." )
-}
-

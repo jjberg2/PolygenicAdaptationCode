@@ -1,0 +1,58 @@
+## env.var.data.files
+## header required, with all three columns CLST, ENV, and REG.
+## REG is the "region" identifier for the regional Z score. 
+## At present the REG column is required,
+## so just fill in some random integer values and then ignore the results if you're not interested in these statistics.
+CLST ENV REG
+BantuKenya 3.0 7
+BantuSouthAfrica 25.625 7
+BiakaPygmy 4.0 7
+Mandenka 12.0 7
+MbutiPygmy 1.0 7
+San 21.0 7
+Yoruba 8.0 7
+Balochi 30.5 3
+Brahui 30.5 3
+Burusho 36.5 3
+Hazara 33.5 3
+Kalash 36.0 3
+Makrani 26.0 3
+Pathan 33.5 3
+Sindhi 25.5 3
+Uygur 44.0 3
+Cambodian 12 4
+Dai 21 4
+Daur 48.5 4
+Han 32.5 4
+Hezhen 47.5 4
+Japanese 38 4
+Lahu 22 4
+Miao 28 4
+Mongola 48.5 4
+Naxi 26 4
+Oroqen 50.5 4
+She 27 4
+Tu 36 4
+Tujia 29 4
+Xibo 43.5 4
+Yakut 63 4
+Yi 28 4
+Adygei 44 1
+Basque 43 1
+French 46 1
+Italian 46 1
+Orcadian 59 1
+Russian 61 1
+Sardinian 40 1
+Tuscan 43 1
+Palestinian 32.000 2
+Druze 32.000 2
+Bedouin 31.000 2
+Mozabite 32.000 2
+Melanesian 6 6
+Papuan 4 6
+Colombian 3 5
+Karitiana 10 5
+Maya 19 5
+Pima 29 5
+Surui 11 5

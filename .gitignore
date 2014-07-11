@@ -1,3 +1,6 @@
+height*/
+*.DS_Store*
+*temp*
 *.acn
 *.acr
 *.alg
@@ -41,4 +44,4 @@ HeightTest*
 *CD*
 *UC*
 *SkinPigment*
-*height*
+Scripts/RunFiles*

@@ -1,0 +1,62 @@
+## match.pop.file
+## contains the frequency and other match attributes from the single population on which to match
+## Ideally, the data in this file comes from the GWAS mapping panel, 
+## but in my analyses we did not have access to this information and so used data from the FRENCH HGDP population
+## as a proxy for the European GWAS panels.
+##
+## In this example, match variables FRQ, IMP, and BVAL are specified via another argument in the fuction,
+## while CLST, A1, A2, POS, and CHR are unnecessary and ignored.
+##
+## Note that this is a minimal example with only ~ 50 SNPs
+## The file you use should ideally include every SNP for which you have frequency/match data in both the GWAS panel
+## and the test dataset.
+SNP CLST A1 A2 FRQ IMP POS CHR BVAL
+rs3094315 French G A 0.178571 0 742429 1 976
+rs12562034 French G A 0.892857 0 758311 1 976
+rs2980319 French T A 0.821429 1 766985 1 976
+rs4040617 French A G 0.821429 1 769185 1 976
+rs2905062 French G A 0.178571 1 774913 1 976
+rs2980300 French T C 0.178571 1 775852 1 976
+rs11240777 French A G 0.285714 1 788822 1 970
+rs950122 French G C 0.9464286 1 836727 1 958
+rs2272756 French G A 0.9821429 1 871896 1 929
+rs3128126 French A G 0.589286 1 952073 1 923
+rs3121561 French C T 0.803571 1 980243 1 889
+rs3813193 French G C 0.821429 1 988364 1 917
+rs4075116 French C* T 0.232143 1 993492 1 923
+rs3934834 French C T 0.821429 0 995669 1 922
+rs3766193 French C* G 0.410714 1 1007033 1 929
+rs3766192 French C T 0.410714 1 1007060 1 929
+rs6667248 French A G 1 1 1007079 1 929
+rs3766191 French C T 0.821429 1 1007450 1 929
+rs12096277 French G A 0 1 1007461 1 929
+rs9442371 French C T 0.410714 1 1008425 1 934
+rs9442372 French G A 0.589286 0 1008567 1 934
+rs10907177 French G A 0.178571 1 1011209 1 934
+rs11260587 French G A 1 1 1011271 1 934
+rs3737728 French A* G 0.232143 0 1011278 1 934
+rs11260588 French G A 1 0 1011521 1 934
+rs9442398 French G A 0.767857 0 1011558 1 934
+rs6701114 French C* T 0.410714 1 1011900 1 934
+rs9442400 French C T 1 1 1015164 1 934
+rs4074137 French C A 0.321429 1 1016570 1 934
+rs6687776 French C T 0.875 0 1020428 1 934
+rs9651273 French G A 0.732143 0 1021403 1 934
+rs11579015 French T C 0.892857 1 1026822 1 940
+rs6671356 French C T 0.125 1 1029889 1 940
+rs6666280 French T C 0.125 1 1036027 1 940
+rs4970405 French A G 0.892857 0 1038818 1 940
+rs12726255 French G A 0.125 0 1039813 1 940
+rs7540009 French G A 0.9821429 0 1050098 1 940
+rs17160824 French G A 0.892857 1 1050471 1 940
+rs17160826 French C T 0.107143 1 1050978 1 940
+rs11807848 French C T 0.321429 0 1051029 1 940
+rs9659914 French C T 0.9821429 1 1051878 1 940
+rs9442373 French C* A 0.339286 0 1052501 1 940
+rs6682475 French C G 0.857143 1 1054398 1 940
+rs2298217 French C T 0.892857 0 1054842 1 940
+rs12145826 French G A 0.9285714 0 1055892 1 940
+rs10907182 French C T 0.714286 1 1056266 1 940
+rs4970357 French C* A 0.0535714 0 1066927 1 940
+rs1539637 French G* C 0.0535714 1 1070788 1 940
+rs7520581 French G T 1 1 1073862 1 940
