@@ -3,7 +3,7 @@ PolygenicAdaptationCode
 This repository contains R code implementing the methods described in my paper with Graham Coop, titled "A Population Genetic Signal of Polygenic Adaptation": arXiv:1307.7759v2
 
 
-Here is some minimal documentation describing each of the files required to run the analysis. See the example run file at path/Example/Run_Files/exampleHeightRunFile.R for an example of a function call.
+Here is some minimal documentation describing each of the files required to run the analysis. See the example run file at path/Example/Run_Files/exampleHeightRunFile.R for an example of a function call. All file names should be specified either with a full path or a path relative to the directory from which the function is called.
 
 See also the headers of each of the corresponding example files found in the Example/ directory for a few more lines of documentation for each file type
 
@@ -31,7 +31,7 @@ null.phenos.per.cycle: essentially the same as cov.SNPs.per.cycle, but specifies
 
 null.cycles: number of batches of null genetic values to calculated to get the null distributions.
 
-load.cov.matrix: if set to TRUE, the program will check in the folder path/Output for a file called "uncenteredcovmat.Rdata", which may have been generated in a previous run of the program. If the file is present, it is read in, and calculation of the covariance matrix is skipped. If absent, or if the value of FALSE, the covariance matrix is calculated as normal.
+load.cov.matrix: if set to TRUE, the program will check in the folder path/Output for a file called "uncenteredcovmat.Rdata", which may have been generated in a previous run of the program ('path' here represents the path given as a part of the function call). If the file is present, it is read in, and calculation of the covariance matrix is skipped. If absent, or if the value of FALSE, the covariance matrix is calculated as normal.
 
 sim.null: if FALSE, the an analytical p-value is obtained for the Qx statistic only by comparing to the relevant Chi^2 distribution. Analytical p-values not currently available for other statistics, but in some cases they can be easily implemented, so it's on the TODO list.
 
