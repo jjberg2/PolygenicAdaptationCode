@@ -22,5 +22,6 @@ PolygenicAdaptationFunction (
 									null.phenos.per.cycle = 1000 , 
 									null.cycles = 10 ,
 									load.cov.mat = T ,
-									sim.null = T
+									sim.null = T ,
+									check.allele.orientation = T
 									)
