@@ -17,7 +17,7 @@ PolygenicAdaptationFunction <- function ( gwas.data.file , freqs.file , env.var.
 	if ( any ( !freqs$CLST %in% env.var.data [[ 1 ]]$CLST ) ) stop ( "Frequency dataset has data for populations not present in environmental variable datasets.")
 	if ( any ( !env.var.data [[ 1 ]]$CLST %in% freqs$CLST ) ) stop ( "Environmental variable dataset has data for populations not present frequency dataset.")
 	if ( any ( !gwas.data$SNP %in% freqs$SNP ) ) stop ( "GWAS dataset contains SNPs that are not in the frequency dataset.")
-	if ( any ( !freqs$SNP %in% gwas.data$SNP ) ) stop ( "GWAS dataset contains SNPs that are not in the frequency dataset.")
+	if ( any ( !freqs$SNP %in% gwas.data$SNP ) ) stop ( "GWAS dataset contains SNPs that are not in the frequency dataset." )
 	
 	
 	if ( check.allele.orientation == T ) gwas.data <- MatchAlleles ( gwas.data , freqs  )
@@ -309,9 +309,10 @@ condNormal <- function(x.given, mu, sigma, given.ind, req.ind){
 	cVar <- B - CDinv %*% t(C)
 	return ( list(condMean=cMu, condVar=cVar) )
 }
+
 SampleCovSNPs <- function ( gwas.data , match.pop , pop.names , bin.names , SNPs.per.cycle , cycles , path , full.dataset.file , env.var.data ) {
 	
-	recover()
+	#recover()
 	num.pops <- length ( pop.names )
 	#T.mat <- matrix ( rep ( c ( ( num.pops - 1 ) / num.pops , rep ( - 1 / ( num.pops ) , times = num.pops ) ) , times = num.pops ) , ncol = num.pops , nrow = num.pops )
 	gwas.cont.table <- table ( gwas.data [ , bin.names ] ) 
