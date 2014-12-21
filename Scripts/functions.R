@@ -202,7 +202,7 @@ NullStats <- function ( gwas.data , match.pop , env.var.data , pop.names , uncen
 		split.sampled.null.data <- split ( sampled.null.data , sampled.null.data$CLST )
 		null.SNP.mat <- do.call ( cbind , sampled.SNPs )
 		null.freqs <- lapply ( split.sampled.null.data , function ( this.pop ) 
-				apply ( null.SNP.mat , 2 , function ( x )  this.pop [ match ( x , this.pop$SNP ) , "FRQ" ] )
+				apply ( null.SNP.mat , 2 , function ( x ) as.numeric ( this.pop [ match ( x , this.pop$SNP ) , "FRQ" ] ) )
 				)
 		effects.mat <- do.call ( cbind , effects.list )
 		new.effects.list <- alply ( effects.mat ,1 , function ( x ) x )
