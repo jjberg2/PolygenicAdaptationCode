@@ -3,7 +3,7 @@ PolygenicAdaptationCode
 This repository contains R code implementing the methods described in my paper with Graham Coop, titled "A Population Genetic Signal of Polygenic Adaptation": arXiv:1307.7759v2
 
 
-Here is some minimal documentation describing each of the files required to run the analysis. See the example run file at path/Example/Run_Files/exampleHeightRunFile.R for an example of a function call. All file names should be specified either with a full path or a path relative to the directory from which the function is called.
+Here is some minimal documentation describing each of the files required to run the analysis. See the example run file at path/Example/Run_Files/exampleHeightRunFile.R for an example of a function call (NOTE: the example as it currently exists does not actually run, and is mearly provided as a guide for how to set up the input files; I will have an actual working example uploaded soon, hopefully by 12/21/2014). All file names should be specified either with a full path or a path relative to the directory from which the function is called.
 
 See also the headers of each of the corresponding example files found in the Example/ directory for a few more lines of documentation for each file type
 
