@@ -1,6 +1,6 @@
-setwd("~/Documents/Academics/PolygenSel/CodeForRelease")
+#setwd("~/Documents/Academics/PolygenSel/CodeForRelease")
 #source ( "~/Documents/Academics/PolygenSel/CodeForRelease/Scripts/CreateTraitFile.R")				
-source ( "~/Documents/Academics/PolygenSel/CodeForRelease/Scripts/functions.R")	 
+source ( "Scripts/functions.R")	 
 #CreateTraitFile ( "Trait_Data/FilesForPaper/height.txt" , "Genome_Data/HapMapInHGDP_PositionsAndBValues")
 #RemoveSNPs ( "Trait_Data/FilesForPaper/height.txt" , "Trait_Data/FilesForPaper/height.HapMapInHGDP_PositionsAndBValues.freqs" , "Trait_Data/FilesForPaper/newheight.txt" )	
 #options ( error = recover)
@@ -13,8 +13,8 @@ PolygenicAdaptationFunction (
 																"Example/EnvVar/HGDP_WINPC1_GLOBAL" , 
 																"Example/EnvVar/HGDP_WINPC2_GLOBAL" 
 																) , # Note: you can supply as many env.var.data.files concurrently as you want. If only supplying one file it should still be included in a list, e.g. env.var.data.files = list ( "Example/EnvVar/HGDP_LATS_GLOBAL")
-									match.pop.file = "Example/Genome_Data/french.match.file.txt" , 
-									full.dataset.file = "Example/Genome_Data/full.genome.file.txt" , 
+									match.pop.file = "Example/Genome_Data/match.file.txt" , 
+									full.dataset.file = "Example/Genome_Data/genome.file.txt" , 
 									path = "Example/Height" , 
 									match.categories = c ( "MAF" , "IMP" , "BVAL" ) ,
 									match.bins = list ( seq ( 0 , 0.5 , 0.02 ), c ( 2 ) , seq ( 0 , 1000 , 100 ) ) , 
