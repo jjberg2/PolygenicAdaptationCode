@@ -36,3 +36,18 @@ load.cov.matrix: if set to TRUE, the program will check in the folder path/Outpu
 sim.null: if FALSE, the an analytical p-value is obtained for the Qx statistic only by comparing to the relevant Chi^2 distribution, and p values for the Z test are taken from the standard normal distribution, rather than from empirical resampling.
 
 check.allele.orientation: compare the gwas.data.file and the freq.file to make sure that alleles are oriented the same way around by comparing columns A1 and A2 from the two files. Alleles which are polarized in opposite directions will be flipped (the frequency listed in the files is assumed in all cases to be that of the A1 allele). The program throws an error if a suspected strand issue is encountered. It does not check for strand errors if this flag is set to FALSE.
+
+
+
+Copyright (C) 2014 by Jeremy J Berg <jeremy.jackson.berg@gmail.com>
+
+Permission to use, copy, modify, and/or distribute this software for any purpose
+with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+THIS SOFTWARE.
